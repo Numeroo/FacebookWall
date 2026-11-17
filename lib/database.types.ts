@@ -3,21 +3,21 @@ export type Database = {
     Tables: {
       posts: {
         Row: {
-          id: string | number;
+          id: string;
           body: string;
-          created_at: string;
+          created_at: string | null;
           user_id: string | null;
         };
         Insert: {
-          id?: string | number;
+          id?: string;
           body: string;
-          created_at?: string;
+          created_at?: string | null;
           user_id?: string | null;
         };
         Update: {
-          id?: string | number;
+          id?: string;
           body?: string;
-          created_at?: string;
+          created_at?: string | null;
           user_id?: string | null;
         };
         Relationships: [];

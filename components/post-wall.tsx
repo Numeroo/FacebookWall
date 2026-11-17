@@ -35,16 +35,14 @@ function isPost(value: unknown): value is Post {
 
   const post = value as Record<string, unknown>;
   return (
-    (typeof post.id === "string" || typeof post.id === "number") &&
+    typeof post.id === "string" &&
     typeof post.body === "string" &&
-    typeof post.created_at === "string"
+    (typeof post.created_at === "string" || post.created_at === null)
   );
 }
 
 function mergePosts(current: Post[], incoming: Post[]) {
-  const postsById = new Map<string | number, Post>(
-    current.map((post) => [post.id, post]),
-  );
+  const postsById = new Map(current.map((post) => [post.id, post]));
 
   for (const post of incoming) {
     postsById.set(post.id, post);
@@ -53,12 +51,17 @@ function mergePosts(current: Post[], incoming: Post[]) {
   return [...postsById.values()]
     .sort(
       (first, second) =>
-        Date.parse(second.created_at) - Date.parse(first.created_at),
+        (second.created_at ? Date.parse(second.created_at) : 0) -
+        (first.created_at ? Date.parse(first.created_at) : 0),
     )
     .slice(0, feedLimit);
 }
 
-function formatPostDate(date: string) {
+function formatPostDate(date: string | null) {
+  if (!date) {
+    return "Date unavailable";
+  }
+
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
@@ -342,8 +345,12 @@ export default function PostWall() {
                       <p className="post-author">Wall member</p>
                       <time
                         className="post-time"
-                        dateTime={post.created_at}
-                        title={new Date(post.created_at).toISOString()}
+                        dateTime={post.created_at ?? undefined}
+                        title={
+                          post.created_at
+                            ? new Date(post.created_at).toISOString()
+                            : undefined
+                        }
                       >
                         {formatPostDate(post.created_at)}
                       </time>
